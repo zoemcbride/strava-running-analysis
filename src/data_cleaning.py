@@ -36,8 +36,6 @@ def run(file_path):
     raw_ugly_data['Activity Week'] = raw_ugly_data['Activity Date'].dt.isocalendar().week
     raw_ugly_data['Activity Hour'] = raw_ugly_data['Activity Date'].dt.hour
 
-    # print(f"First five rows of your raw ugly data look like this:\n {raw_ugly_data[0:5]}")
-
     # Create new df called cleaned_df. Obviously it is not perfectly cleaned but it's a start!
     cleaned_df = raw_ugly_data.copy()
 
