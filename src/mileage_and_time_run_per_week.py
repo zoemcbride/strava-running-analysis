@@ -45,8 +45,9 @@ def create_weekly_avg_df(running_df, num_weeks_current_year: int, num_weeks_typi
 
 
 def create_weekly_avg_graph(weekly_avg_df):
-    weekly_avg_df_graph = weekly_avg_df[
-        (weekly_avg_df['Activity Year'] > 2018) & (weekly_avg_df['Activity Year'] < 2023)].reset_index()
+    # TODO: ZMcB Oct 4 2023 Add ability to filter by years such as:
+    #  [(weekly_avg_df['Activity Year'] > 2018) & (weekly_avg_df['Activity Year'] < 2023)]
+    weekly_avg_df_graph = weekly_avg_df.reset_index()
 
     ax = sns.barplot(data=weekly_avg_df_graph, x='Activity Year', y='Weekly Distance Run (Miles)', palette='flare')
     ax.grid(True, alpha=0.4)  # Add gridlines for better readability
