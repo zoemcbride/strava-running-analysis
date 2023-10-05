@@ -1,11 +1,12 @@
 ###
 # This should be the only script you need to touch.
-# Update this script and run to see your results analyzed & visualized.
+# Run the script and respond to the prompts to see your results analyzed & visualized.
 ###
 
 import os
 from src import data_cleaning
 from src.mileage_and_time_run_per_week import *
+from src.heart_rate_influences import *
 from utils.running_utils import *
 import pandas as pd
 
@@ -36,35 +37,50 @@ def main():
     if logic == "False":
         raise ValueError("Double check the data and try again.")
 
+    print("The following can be inputted, or left blank if you want to assume default: \n")
+
     # Set up weekly average data frame inputs
-    current_year = input("The current year is (if left blank, assumes 2023): ")
+    current_year = input("The current year is: ")
     if not current_year:
-        current_year = 2023
-        print("Assuming 2023...")
+        current_year = running_df.reset_index()['Activity Year'][len(running_df) - 1]
+        print(f"Assuming {current_year}...")
     else:
         current_year = int(current_year)
 
     num_weeks_current_year = input(f"The number of weeks of data collected in {current_year} so far: ")
     if not num_weeks_current_year:
-        raise ValueError("Must insert some value")
+        num_weeks_current_year = running_df.reset_index()['Activity Week'][len(running_df) - 1]
+        print(f"Assuming {num_weeks_current_year}...")
     else:
         num_weeks_current_year = int(num_weeks_current_year)
 
-    num_weeks_typical = input("The number of weeks per year to consider in a typical year is (if left blank, "
-                              "assumes 52): ")
+    num_weeks_typical = input("The number of weeks per year to consider in a typical year is: ")
     if not num_weeks_typical:
         num_weeks_typical = 52
         print("Assuming 52 weeks...")
     else:
         num_weeks_typical = int(num_weeks_typical)
 
+    first_year = running_df.reset_index()['Activity Year'][0]
+    num_weeks_first_year = input(f"The number of weeks of data collected in {first_year}: ")
+    if not num_weeks_first_year:
+        num_weeks_first_year = num_weeks_typical - running_df[running_df['Activity Year'] == 2018][
+            'Activity Week'].sort_values().reset_index(drop=True)[0]
+        print(f"Assuming {num_weeks_first_year}...")
+    else:
+        num_weeks_first_year = int(num_weeks_first_year)
+
     weekly_avg_df = create_weekly_avg_df(running_df, num_weeks_current_year=num_weeks_current_year,
-                                         num_weeks_typical=num_weeks_typical, current_year=current_year)
+                                         num_weeks_typical=num_weeks_typical, current_year=current_year,
+                                         num_weeks_first_year=num_weeks_first_year)
     print("\n Your weekly averages are...\n")
     print(weekly_avg_df)
 
     print("Create weekly average running graph and save")
     create_weekly_avg_graph(weekly_avg_df)
+
+    print("Create weekly average time run graph and save")
+    create_weekly_time_spent_running_graph(running_df)
 
 
 if __name__ == "__main__":
