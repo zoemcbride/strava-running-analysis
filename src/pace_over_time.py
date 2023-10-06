@@ -58,12 +58,12 @@ def run(running_df, start_date, end_date, degree, rounded_running_length):
             ax.set_title(f'Number of Runs Completed vs\n Distance (Rounded)')
 
     # Adjust spacing and layout
-    plt.tight_layout()
+    fig.tight_layout()
 
-    plt.savefig('output_graphs/numberruns_vs_distancerounded.png')
+    fig.savefig('output_graphs/numberruns_vs_distancerounded.png')
 
     # Show the plot
-    plt.show()
+    fig.show()
 
     # Pace over time with trend line
     if rounded_running_length=="":
@@ -78,7 +78,7 @@ def run(running_df, start_date, end_date, degree, rounded_running_length):
     filtered_running_df.sort_values(by='Activity Date', ascending=True, inplace=True)
 
     # Create the first plot with the left y-axis
-    fig, ax1 = plt.subplots(figsize=(12, 6))
+    fig2, ax1 = plt.subplots(figsize=(12, 6))
 
     # Create a line plot to visualize pace over time
     ax1.plot(filtered_running_df.loc[(filtered_running_df['Activity Date'] > start_date) & (
@@ -112,7 +112,7 @@ def run(running_df, start_date, end_date, degree, rounded_running_length):
 
     # Show the plot
     plt.grid(True)
-    plt.xticks(rotation=45)  # Rotate x-axis labels for better visibility
+    plt.xticks(rotation=45)  # This sets the x-tick labels with the desired rotation
     plt.legend(lines, labels)
     plt.tight_layout()
     plt.savefig('output_graphs/pace_trend_vs_time.png')

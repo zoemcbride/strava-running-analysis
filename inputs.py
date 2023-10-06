@@ -13,12 +13,51 @@ import pandas as pd
 from datetime import datetime
 
 
+def get_input_with_default(prompt, default_value, data_type=str):
+    user_input = input(prompt)
+    return data_type(user_input) if user_input else data_type(default_value)
+
+
+def get_filepath_input():
+    return input("Specify the file path location for 'activities.csv' file: ")
+
+
+def get_yearly_data_inputs(running_df):
+    current_year = get_input_with_default("[Optional] The current year is: ",
+                                          running_df.reset_index()['Activity Year'][len(running_df) - 1], int)
+    num_weeks_current_year = get_input_with_default(f"[Optional] The number of weeks of data collected in "
+                                                    f"{current_year} so far: ",
+                                                    running_df.reset_index()['Activity Week'][len(running_df) - 1], int)
+    num_weeks_typical = get_input_with_default("[Optional] The number of weeks per year to consider in a typical year "
+                                               "is: ", 52, int)
+    first_year = running_df.reset_index()['Activity Year'][0]
+    num_weeks_first_year = get_input_with_default(f"[Optional] The number of weeks of data collected in {first_year}: ",
+                                                  num_weeks_typical - running_df[running_df['Activity Year'] == 2018][
+                                                      'Activity Week'].sort_values().reset_index(drop=True)[0], int)
+
+    return current_year, num_weeks_current_year, num_weeks_typical, num_weeks_first_year
+
+
+def get_pace_over_time_inputs(running_df, first_year):
+    start_date = get_input_with_default("[Optional] Specify the start date in format such as 01-01-2019...",
+                                        f'01-01-{str(first_year)}')
+    end_date = get_input_with_default("[Optional] Specify the end date in format such as 05-01-2023...",
+                                      running_df['Activity Date'].sort_values(ascending=False).reset_index(drop=True)[
+                                          0].strftime("%m-%d-%Y"))
+    degree = get_input_with_default("[Optional] Specify the degree of fit for the pace over time with trend graph...",
+                                    3, int)
+    rounded_running_length = get_input_with_default(
+        "[Optional] Specify the rounded running length, in miles, to assess pace over time...", "")
+
+    return start_date, end_date, degree, rounded_running_length
+
+
 def main():
     print("Welcome to My Strava Analytics Project! :)")
 
     # Specify the file path location for 'activities.csv' file as a string
     # ie, /Users/zoemcbride/repos/health_running_analysis/strava_export_36240949/activities.csv
-    file_path = input("Specify the file path location for 'activities.csv' file: ")
+    file_path = get_filepath_input()
 
     # Run the data cleaning script
     cleaned_df = data_cleaning.run(file_path)
@@ -42,35 +81,7 @@ def main():
     print("The following can be inputted, or left blank if you want to assume default: \n")
 
     # Set up weekly average data frame inputs
-    current_year = input("The current year is: ")
-    if not current_year:
-        current_year = running_df.reset_index()['Activity Year'][len(running_df) - 1]
-        print(f"Assuming {current_year}...")
-    else:
-        current_year = int(current_year)
-
-    num_weeks_current_year = input(f"The number of weeks of data collected in {current_year} so far: ")
-    if not num_weeks_current_year:
-        num_weeks_current_year = running_df.reset_index()['Activity Week'][len(running_df) - 1]
-        print(f"Assuming {num_weeks_current_year}...")
-    else:
-        num_weeks_current_year = int(num_weeks_current_year)
-
-    num_weeks_typical = input("The number of weeks per year to consider in a typical year is: ")
-    if not num_weeks_typical:
-        num_weeks_typical = 52
-        print("Assuming 52 weeks...")
-    else:
-        num_weeks_typical = int(num_weeks_typical)
-
-    first_year = running_df.reset_index()['Activity Year'][0]
-    num_weeks_first_year = input(f"The number of weeks of data collected in {first_year}: ")
-    if not num_weeks_first_year:
-        num_weeks_first_year = num_weeks_typical - running_df[running_df['Activity Year'] == 2018][
-            'Activity Week'].sort_values().reset_index(drop=True)[0]
-        print(f"Assuming {num_weeks_first_year}...")
-    else:
-        num_weeks_first_year = int(num_weeks_first_year)
+    current_year, num_weeks_current_year, num_weeks_typical, num_weeks_first_year = get_yearly_data_inputs(running_df)
 
     weekly_avg_df = create_weekly_avg_df(running_df, num_weeks_current_year=num_weeks_current_year,
                                          num_weeks_typical=num_weeks_typical, current_year=current_year,
@@ -87,30 +98,14 @@ def main():
     print("Creating heart rate vs pace and heart rate vs apparent temperature graphs. Saving in output_graphs/...")
     heart_rate_influences.run(running_df)
 
-    # Specify inputs to graph
-    start_date = input("[Optional] Specify the start date in format such as 01-01-2019...")
-    end_date = input("[Optional] Specify the end date in format such as 05-01-2023...")
-    degree = input("[Optional] Specify the degree of fit for the pace over time with trend graph...")
-    rounded_running_length = input("[Optional] Specify the rounded running length, in miles, to assess pace over "
-                                       "time...")
-    if not start_date:
-        start_date = f'01-01-{str(first_year)}'
-        print(f"Assuming start date of {start_date}")
+    # Identify the first year of the data set
+    first_year = running_df.reset_index()['Activity Year'][0]
 
-    if not end_date:
-        end_date = running_df['Activity Date'].sort_values(ascending=False).reset_index(drop=True)[0].strftime("%m-%d-%Y")
-        print(f"Assuming end date of {end_date}")
+    print("\nThe following apply to the pace over time graphs. These can be inputted, or left blank if you want to"
+          " assume default: \n")
 
-    if degree:
-        degree = int(degree)
-    if not degree:
-        degree = 3
-        print("Assuming degree of 3")
-
-    if rounded_running_length:
-        rounded_running_length = str(rounded_running_length)
-    if not rounded_running_length:
-        rounded_running_length = ""
+    # Specify inputs to pace over time graphs
+    start_date, end_date, degree, rounded_running_length = get_pace_over_time_inputs(running_df, first_year)
 
     print("Creating distance counts per year and number of runs vs distance counts graphs. Saving in output_graphs/...")
     pace_over_time.run(running_df=running_df, start_date=start_date, end_date=end_date, degree=degree,
