@@ -66,14 +66,16 @@ def run(running_df, start_date, end_date, degree, rounded_running_length):
     plt.show()
 
     # Pace over time with trend line
+    if rounded_running_length=="":
+        rounded_running_length = str(top_distance_run)
+    else:
+        print(f"Using runs of distance {rounded_running_length}...")
+
     # Filter runs with distances equal to specified number of miles (rounded_running_length)
-    filtered_running_df = running_df[running_df['Rounded Distance'] == rounded_running_length].copy()
+    filtered_running_df = running_df[running_df['Rounded Distance'] == int(rounded_running_length)].copy()
 
     # Sort the dataframe by 'Miles Run Last Month' for polynomial fitting
     filtered_running_df.sort_values(by='Activity Date', ascending=True, inplace=True)
-
-    if rounded_running_length=="":
-        rounded_running_length = top_distance_run
 
     # Create the first plot with the left y-axis
     fig, ax1 = plt.subplots(figsize=(12, 6))
