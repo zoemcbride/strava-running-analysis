@@ -6,9 +6,11 @@
 import os
 from src import data_cleaning
 from src.mileage_and_time_run_per_week import *
-from src.heart_rate_influences import *
+from src import heart_rate_influences
+from src import pace_over_time
 from utils.running_utils import *
 import pandas as pd
+from datetime import datetime
 
 
 def main():
@@ -76,11 +78,43 @@ def main():
     print("\n Your weekly averages are...\n")
     print(weekly_avg_df)
 
-    print("Create weekly average running graph and save")
+    print("Creating weekly average running graph and saving in output_graphs/...")
     create_weekly_avg_graph(weekly_avg_df)
 
-    print("Create weekly average time run graph and save")
+    print("Creating weekly average time run graph and saving in output_graphs/...")
     create_weekly_time_spent_running_graph(running_df)
+
+    print("Creating heart rate vs pace and heart rate vs apparent temperature graphs. Saving in output_graphs/...")
+    heart_rate_influences.run(running_df)
+
+    # Specify inputs to graph
+    start_date = input("[Optional] Specify the start date in format such as 01-01-2019...")
+    end_date = input("[Optional] Specify the end date in format such as 05-01-2023...")
+    degree = input("[Optional] Specify the degree of fit for the pace over time with trend graph...")
+    rounded_running_length = input("[Optional] Specify the rounded running length, in miles, to assess pace over "
+                                       "time...")
+    if not start_date:
+        start_date = f'01-01-{str(first_year)}'
+        print(f"Assuming start date of {start_date}")
+
+    if not end_date:
+        end_date = running_df['Activity Date'].sort_values(ascending=False).reset_index(drop=True)[0].strftime("%m-%d-%Y")
+        print(f"Assuming end date of {end_date}")
+
+    if degree:
+        degree = int(degree)
+    if not degree:
+        degree = 3
+        print("Assuming degree of 3")
+
+    if rounded_running_length:
+        rounded_running_length = str(rounded_running_length)
+    if not rounded_running_length:
+        rounded_running_length = ""
+
+    print("Creating distance counts per year and number of runs vs distance counts graphs. Saving in output_graphs/...")
+    pace_over_time.run(running_df=running_df, start_date=start_date, end_date=end_date, degree=degree,
+                       rounded_running_length=rounded_running_length)
 
 
 if __name__ == "__main__":
