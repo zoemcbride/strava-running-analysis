@@ -238,4 +238,5 @@ fabric.properties
 .idea/caches/build_file_checksums.ser
 
 # Ignore the output graphs
-output_graphs
+output_graphs/*.png
+
