@@ -1,6 +1,6 @@
 # strava-running-analysis
 
-![Status](https://img.shields.io/badge/Status-Work%20In%20Progress-orange)
+![Status](https://img.shields.io/badge/Status-Active-green)
 
 ## About
 
